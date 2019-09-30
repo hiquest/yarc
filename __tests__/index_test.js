@@ -1,18 +1,6 @@
 import yarc from '../src/index'
 
-// single user
-// api.users(1).fetch()
-
-// create a user
-// api.users().create({ name: 'John' })
-
-// update a user
-// api.users(1).update({ name: 'John' })
-
-// delete a user
-// api.users(1).del()
-
-describe('YARC librariry', () => {
+describe('YARC', () => {
   let fetch
 
   const api = yarc(
@@ -34,7 +22,31 @@ describe('YARC librariry', () => {
 
     expect(fetch.mock.calls.length).toEqual(1)
     const args = fetch.mock.calls[0]
-    expect(args).toEqual(['https://google.com/api/users', { method: 'GET' }])
+    expect(args).toEqual([
+      'https://google.com/api/users/',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ])
+  })
+
+  it('fetches the list of users with params', () => {
+    api.users().fetch({ page: 1, limit: 10 })
+
+    expect(fetch.mock.calls.length).toEqual(1)
+    const args = fetch.mock.calls[0]
+    expect(args).toEqual([
+      'https://google.com/api/users/?page=1&limit=10',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ])
   })
 
   it('fetches a user', () => {
@@ -42,7 +54,15 @@ describe('YARC librariry', () => {
 
     expect(fetch.mock.calls.length).toEqual(1)
     const args = fetch.mock.calls[0]
-    expect(args).toEqual(['https://google.com/api/users/1', { method: 'GET' }])
+    expect(args).toEqual([
+      'https://google.com/api/users/1/',
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
+    ])
   })
 
   it('update a user', () => {
@@ -51,8 +71,14 @@ describe('YARC librariry', () => {
     expect(fetch.mock.calls.length).toEqual(1)
     const args = fetch.mock.calls[0]
     expect(args).toEqual([
-      'https://google.com/api/users/1',
-      { method: 'PATCH', body: '{"name":"John"}' },
+      'https://google.com/api/users/1/',
+      {
+        method: 'PATCH',
+        body: '{"name":"John"}',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
     ])
   })
 
@@ -62,8 +88,13 @@ describe('YARC librariry', () => {
     expect(fetch.mock.calls.length).toEqual(1)
     const args = fetch.mock.calls[0]
     expect(args).toEqual([
-      'https://google.com/api/users/1',
-      { method: 'DELETE' },
+      'https://google.com/api/users/1/',
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
     ])
   })
 
@@ -73,8 +104,14 @@ describe('YARC librariry', () => {
     expect(fetch.mock.calls.length).toEqual(1)
     const args = fetch.mock.calls[0]
     expect(args).toEqual([
-      'https://google.com/api/users',
-      { method: 'POST', body: '{"name":"John"}' },
+      'https://google.com/api/users/',
+      {
+        method: 'POST',
+        body: '{"name":"John"}',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      },
     ])
   })
 })
