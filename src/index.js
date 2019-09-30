@@ -3,25 +3,35 @@ export default function({ baseUrl }, entities) {
 
   Object.keys(entities).forEach(entity => {
     res[entity] = pk => {
+      const { onMember = {}, onCollection = {} } = entities[entity]
       if (pk) {
+        const memberURL = buildUrl(baseUrl, entity, pk)
         return {
-          fetch: async () => jsonCall('GET', buildUrl(baseUrl, entity, pk)),
-          update: async data =>
-            jsonCall('PATCH', buildUrl(baseUrl, entity, pk), data),
-          del: async () => jsonCall('DELETE', buildUrl(baseUrl, entity, pk)),
+          fetch: async () => jsonCall('GET', memberURL),
+          update: async data => jsonCall('PATCH', memberURL, data),
+          del: async () => jsonCall('DELETE', memberURL),
+          ...customActions(onMember, memberURL),
         }
       } else {
+        const colUrl = buildUrl(baseUrl, entity)
         return {
-          fetch: async queryParams =>
-            jsonCall('GET', buildUrl(baseUrl, entity), queryParams),
-          create: async data =>
-            jsonCall('POST', buildUrl(baseUrl, entity), data),
+          fetch: async queryParams => jsonCall('GET', colUrl, queryParams),
+          create: async data => jsonCall('POST', colUrl, data),
+          ...customActions(onCollection, colUrl),
         }
       }
     }
   })
 
   return res
+}
+
+function customActions(actions, base) {
+  return Object.keys(actions).reduce((acc, m) => {
+    const name = actions[m]
+    acc[name] = data => jsonCall(m, `${base}${name}`, data)
+    return acc
+  }, {})
 }
 
 async function jsonCall(method, initialUrl, data = {}, headers = {}) {
