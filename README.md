@@ -19,6 +19,8 @@ npm install --save yarc-client
 ## Example of usage
 
 ```javascript
+import yarc from 'yarc-client'
+
 const api = yarc(
   { baseUrl: '/api/v1/' },
   {
