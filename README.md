@@ -10,6 +10,12 @@ A semantic REST client that focuses on REST entities and endpoints. It provides 
 - Nested endpoints
 - Depends on the [Fetch API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
 
+## Install
+
+```
+npm install --save yarc-client
+```
+
 ## Example of usage
 
 ```javascript

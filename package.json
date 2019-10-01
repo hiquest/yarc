@@ -1,6 +1,6 @@
 {
-  "name": "yarc",
-  "version": "1.0.0",
+  "name": "yarc-client",
+  "version": "0.1.0",
   "description": "Yet Another REST API Client",
   "main": "build.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "test-watch": "jest --watch",
     "build": "babel src/index.js --out-file build.js"
   },
-  "keywords": [],
+  "keywords": ["api", "rest", "promise"],
   "author": "@janis_t",
   "license": "ISC",
   "devDependencies": {
