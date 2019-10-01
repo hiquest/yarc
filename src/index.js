@@ -1,29 +1,41 @@
 export default function({ baseUrl }, entities) {
-  let res = {}
+  return Object.keys(entities).reduce((acc, entity) => {
+    acc[entity] = prepareEndpoint(baseUrl, entity, entities[entity])
+    return acc
+  }, {})
+}
 
-  Object.keys(entities).forEach(entity => {
-    res[entity] = pk => {
-      const { onMember = {}, onCollection = {} } = entities[entity]
-      if (pk) {
-        const memberURL = buildUrl(baseUrl, entity, pk)
-        return {
-          fetch: async () => jsonCall('GET', memberURL),
-          update: async data => jsonCall('PATCH', memberURL, data),
-          del: async () => jsonCall('DELETE', memberURL),
-          ...customActions(onMember, memberURL),
-        }
-      } else {
-        const colUrl = buildUrl(baseUrl, entity)
-        return {
-          fetch: async queryParams => jsonCall('GET', colUrl, queryParams),
-          create: async data => jsonCall('POST', colUrl, data),
-          ...customActions(onCollection, colUrl),
-        }
+function prepareEndpoint(
+  baseUrl,
+  endpoint,
+  { onMember = {}, onCollection = {}, nested = {} },
+) {
+  return pk => {
+    if (pk) {
+      const memberURL = buildUrl(baseUrl, endpoint, pk)
+      const res = {
+        fetch: async () => jsonCall('GET', memberURL),
+        update: async data => jsonCall('PATCH', memberURL, data),
+        del: async () => jsonCall('DELETE', memberURL),
+        ...customActions(onMember, memberURL),
+      }
+
+      if (Object.keys(nested).length > 0) {
+        Object.keys(nested).forEach(n => {
+          res[n] = prepareEndpoint(memberURL, n, nested[n])
+        })
+      }
+
+      return res
+    } else {
+      const colUrl = buildUrl(baseUrl, endpoint)
+      return {
+        fetch: async queryParams => jsonCall('GET', colUrl, queryParams),
+        create: async data => jsonCall('POST', colUrl, data),
+        ...customActions(onCollection, colUrl),
       }
     }
-  })
-
-  return res
+  }
 }
 
 function customActions(actions, base) {

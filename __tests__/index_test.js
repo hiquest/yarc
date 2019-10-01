@@ -182,6 +182,60 @@ describe('YARC', () => {
       ])
     })
   })
+
+  describe('Nested actions', () => {
+    const api = yarc(
+      {
+        baseUrl: 'https://google.com/api',
+      },
+      {
+        users: {
+          nested: {
+            books: {},
+          },
+        },
+      },
+    )
+
+    it('can fetch nested list', async () => {
+      await api
+        .users(1)
+        .books()
+        .fetch()
+
+      expect(fetch.mock.calls.length).toEqual(1)
+      const args = fetch.mock.calls[0]
+      expect(args).toEqual([
+        'https://google.com/api/users/1/books/',
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      ])
+    })
+
+    it('can create a nested entity', async () => {
+      await api
+        .users(1)
+        .books()
+        .create({ title: 'New Book' })
+
+      expect(fetch.mock.calls.length).toEqual(1)
+      const args = fetch.mock.calls[0]
+      expect(args).toEqual([
+        'https://google.com/api/users/1/books/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: '{"title":"New Book"}',
+        },
+      ])
+    })
+  })
 })
 
 function fetchIml() {
