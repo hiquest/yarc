@@ -10,7 +10,7 @@
   },
   "keywords": ["api", "rest", "promise"],
   "author": "@janis_t",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.6.2",
     "@babel/preset-env": "^7.6.2",
