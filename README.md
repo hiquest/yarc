@@ -34,8 +34,6 @@ const api = yarc(
 ### Basic CRUD
 
 ```javascript
-### Basic CRUD
-
 // Get a single user (GET /api/v1/users/1)
 await api.users(1).fetch()
 
