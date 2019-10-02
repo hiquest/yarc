@@ -16,7 +16,7 @@ A semantic REST client that focuses on REST entities and endpoints. It provides 
 npm install --save yarc-client
 ```
 
-## Example of usage
+## Usage
 
 ```javascript
 import yarc from 'yarc-client'
@@ -29,6 +29,12 @@ const api = yarc(
     notes: { onCollection: [{}] },
   },
 )
+```
+
+### Basic CRUD
+
+```javascript
+### Basic CRUD
 
 // Get a single user (GET /api/v1/users/1)
 await api.users(1).fetch()
@@ -38,13 +44,21 @@ await api.users(1).update({ name: 'John' })
 
 // Get all books (GET /api/v1/books?page=0&limit=20)
 await api.books().fetch({ page: 0, limit: 20 })
+```
 
+### Nested endpoints
+
+```javascript
 // Get all notes by a user (GET /api/v1/users/1/notes)
 await api
   .users(1)
   .notes()
   .fetch()
+```
 
+### Custom actions
+
+```javascript
 // Lookup a book (GET /api/v1/books/lookup?query=abc)
 await api.books().lookup({ query: 'abc' })
 
