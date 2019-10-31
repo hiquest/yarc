@@ -1,7 +1,9 @@
-import yarc from '../src/index'
+import yarc from '../index'
+
+declare var global: any
 
 describe('YARC', () => {
-  let fetch
+  let fetch: any
 
   beforeEach(() => {
     fetch = jest.fn()
