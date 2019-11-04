@@ -4,23 +4,17 @@ interface Options {
   baseUrl: string
 }
 
-type CustomActions = {
-  GET?: string,
-  POST?: string,
-  PUT?: string,
-  PATCH?: string,
-  DELETE?: string,
-}
+type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-type Method = keyof CustomActions
+type CustomActions = Array<[Method, string]>
 
 type Entities = {
   [k in string]: Declarations
 }
 
 type Declarations = {
-  onMember?: CustomActions,
-  onCollection?: CustomActions,
+  onMember?: CustomActions
+  onCollection?: CustomActions
   nested?: { [k in string]: Declarations }
 }
 
@@ -41,7 +35,7 @@ function create({ baseUrl }: Options, entities: Entities) {
 function prepareEndpoint(
   baseUrl: string,
   endpoint: string,
-  { onMember = {}, onCollection = {}, nested = {} }: Declarations,
+  { onMember = [], onCollection = [], nested = {} }: Declarations,
 ) {
   return (pk: string | null) => {
     if (pk) {
@@ -74,17 +68,16 @@ function prepareEndpoint(
 }
 
 function customActions(actions: CustomActions, base: string) {
-
-  const keys = Object.keys(actions) as Array<Method>
-
-  return keys.reduce((acc, m) => {
-    const name = actions[m]
-    if (name) {
-      acc[name] = (data: Data) => jsonCall(m, `${base}${name}`, data)
+  return actions.reduce(
+    (acc, [m, name]) => {
+      if (name) {
+        acc[name] = (data: Data) => jsonCall(m, `${base}${name}`, data)
+        return acc
+      }
       return acc
-    }
-    return acc
-  }, {} as { [key in string]: { (data: Data): Promise<any> } })
+    },
+    {} as { [key in string]: { (data: Data): Promise<any> } },
+  )
 }
 
 async function jsonCall(

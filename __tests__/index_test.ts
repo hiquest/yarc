@@ -143,12 +143,8 @@ describe('YARC', () => {
       },
       {
         users: {
-          onMember: {
-            GET: 'notes',
-          },
-          onCollection: {
-            POST: 'check',
-          },
+          onMember: [['GET', 'notes']],
+          onCollection: [['POST', 'check']],
         },
       },
     )
