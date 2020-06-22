@@ -16,7 +16,7 @@
   "author": "@janis_t",
   "license": "MIT",
   "devDependencies": {
-    "@types/jest": "^24.0.21",
+    "@types/jest": "^24.9.0",
     "jest": "^24.9.0",
     "ts-jest": "^24.1.0",
     "typescript": "^3.6.4"

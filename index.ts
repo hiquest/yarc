@@ -6,40 +6,56 @@ interface Options {
 
 type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
-type CustomActions = Array<[Method, string]>
+type CustomActions<T extends string> = Array<[Method, T]>
 
-type Entities = {
-  [k in string]: Declarations
+type Entities<T extends string, U extends string, V extends string> = {
+  [k in T]: Declarations<U, V>
 }
 
-type Declarations = {
-  onMember?: CustomActions
-  onCollection?: CustomActions
-  nested?: { [k in string]: Declarations }
+type Declarations<K extends string, U extends string> = {
+  onMember?: CustomActions<K>
+  onCollection?: CustomActions<U>
 }
 
 type Data = {
   [key: string]: any
 }
 
-function create({ baseUrl }: Options, entities: Entities) {
-  return Object.keys(entities).reduce(
+function create<T extends string, U extends string, V extends string>(
+  { baseUrl }: Options,
+  entities: Entities<T, U, V>,
+) {
+  const keys = Object.keys(entities) as Array<T>
+  return keys.reduce(
     (acc, entity) => {
       acc[entity] = prepareEndpoint(baseUrl, entity, entities[entity])
       return acc
     },
-    {} as any,
+    {} as { [k in T]: Endpoint<U, V> },
   )
 }
 
-function prepareEndpoint(
+type MemberCalls<T extends string> = {
+  [k in T | 'fetch' | 'update' | 'del']: (data?: Data) => Promise<any>
+}
+
+type CollectionCalls<T extends string> = {
+  [k in T | 'fetch' | 'create']: (data?: Data) => Promise<any>
+}
+
+interface Endpoint<U extends string, V extends string> {
+  (): CollectionCalls<V>
+  (pk: string | number): MemberCalls<U>
+}
+
+function prepareEndpoint<U extends string, V extends string>(
   baseUrl: string,
   endpoint: string,
-  { onMember = [], onCollection = [], nested = {} }: Declarations,
-) {
-  return (pk: string | null) => {
+  { onMember = [], onCollection = [] }: Declarations<U, V>,
+): Endpoint<U, V> {
+  return (pk?: string | number) => {
     if (pk) {
-      const memberURL = buildUrl(baseUrl, endpoint, pk)
+      const memberURL = buildUrl(baseUrl, endpoint, pk.toString())
       const res: any = {
         fetch: async () => jsonCall('GET', memberURL),
         update: async (data: Data) => jsonCall('PATCH', memberURL, data),
@@ -47,12 +63,12 @@ function prepareEndpoint(
         ...customActions(onMember, memberURL),
       }
 
-      const nkeys = Object.keys(nested)
-      if (nkeys.length > 0) {
-        nkeys.forEach(n => {
-          res[n] = prepareEndpoint(memberURL, n, nested[n])
-        })
-      }
+      // const nkeys = Object.keys(nested)
+      // if (nkeys.length > 0) {
+      //   nkeys.forEach(n => {
+      //     res[n] = prepareEndpoint(memberURL, n, nested[n])
+      //   })
+      // }
 
       return res
     } else {
@@ -67,7 +83,10 @@ function prepareEndpoint(
   }
 }
 
-function customActions(actions: CustomActions, base: string) {
+function customActions<T extends string>(
+  actions: CustomActions<T>,
+  base: string,
+) {
   return actions.reduce(
     (acc, [m, name]) => {
       if (name) {
@@ -76,7 +95,7 @@ function customActions(actions: CustomActions, base: string) {
       }
       return acc
     },
-    {} as { [key in string]: { (data: Data): Promise<any> } },
+    {} as { [key in T]: { (data: Data): Promise<any> } },
   )
 }
 
@@ -147,3 +166,19 @@ function endsWith(str: string, search: string) {
   const length = str.length
   return str.substring(length - search.length, length) === search
 }
+
+const api = yarc(
+  { baseUrl: '/api/v1/' },
+  {
+    users: {
+      books: {
+        onMember: [
+          { POST: 'mark_read' }
+        ]
+      },
+      notes: {},
+    },
+    books: { onCollection: [{ GET: lookup }] },
+    notes: { onCollection: [{}] },
+  },
+)
